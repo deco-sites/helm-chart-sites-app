@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name | default (include "app-chart.fullname" .) }}
+  labels:
+    {{- include "app-chart.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- with .Values.ingress.extraAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- $tlsSecretName := .Values.ingress.tls.secretName | default .Values.certificate.secretName | default (printf "%s-tls" (include "app-chart.fullname" .)) }}
+  {{- $previewSet := dict }}
+  {{- range .Values.workload.previewHosts | default list }}
+  {{- $_ := set $previewSet . . }}
+  {{- end }}
+  {{- $mainHosts := list }}
+  {{- range .Values.certificate.dnsNames | default list }}
+  {{- if not (hasKey $previewSet .) }}
+  {{- $mainHosts = push $mainHosts . }}
+  {{- end }}
+  {{- end }}
+  {{- if $mainHosts }}
+  tls:
+    - hosts:
+        {{- toYaml $mainHosts | nindent 8 }}
+      secretName: {{ $tlsSecretName }}
+  {{- end }}
+  rules:
+    {{- $svcName := include "app-chart.mainServiceName" . }}
+    {{- $svcPort := .Values.service.port }}
+    {{- range $mainHosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+    {{- end }}

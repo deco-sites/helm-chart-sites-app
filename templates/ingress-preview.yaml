@@ -1,0 +1,36 @@
+{{- if and (eq .Values.workload.type "argorollout") .Values.workload.previewHosts }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "app-chart.fullname" . }}-preview
+  labels:
+    {{- include "app-chart.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- with .Values.ingress.extraAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- $tlsSecretName := .Values.ingress.tls.secretName | default .Values.certificate.secretName | default (printf "%s-tls" (include "app-chart.fullname" .)) }}
+  tls:
+    - hosts:
+        {{- toYaml .Values.workload.previewHosts | nindent 8 }}
+      secretName: {{ $tlsSecretName }}
+  rules:
+    {{- $svcName := printf "%s-preview" (include "app-chart.fullname" .) }}
+    {{- $svcPort := .Values.service.port }}
+    {{- range .Values.workload.previewHosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+    {{- end }}
+{{- end }}

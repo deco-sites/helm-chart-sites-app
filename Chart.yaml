@@ -1,0 +1,14 @@
+apiVersion: v2
+name: app-chart
+description: Helm chart for deploy Deco Sites
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - deployment
+  - ingress
+  - cert-manager
+  - external-secrets
+  - traefik
+maintainers:
+  - name: deco
