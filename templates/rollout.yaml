@@ -17,6 +17,7 @@ spec:
       activeService: {{ include "app-chart.fullname" . }}-active
       previewService: {{ include "app-chart.fullname" . }}-preview
       autoPromotionEnabled: {{ .Values.workload.blueGreen.autoPromotionEnabled | default false }}
+      scaleDownDelaySeconds: {{ .Values.workload.blueGreen.scaleDownDelaySeconds | default 30 }}
       {{- if .Values.workload.analysisTemplate.enabled }}
       prePromotionAnalysis:
         templates:

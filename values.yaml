@@ -10,6 +10,8 @@ workload:
   # Apenas para type: argorollout
   blueGreen:
     autoPromotionEnabled: false
+    # Segundos que os pods antigos permanecem após promoção (garante que o active service tenha endpoints antes dos velhos pods sumirem)
+    scaleDownDelaySeconds: 30
   # Hosts para o Ingress de preview (Blue Green); ex: ["preview.meusite.com"]. Para TLS, inclua também em certificate.dnsNames.
   previewHosts: []
   # AnalysisTemplate opcional: valida o endpoint preview (HTTP 200) antes de promover. Com enabled: true, use autoPromotionEnabled: true para promover automaticamente quando o teste passar.
