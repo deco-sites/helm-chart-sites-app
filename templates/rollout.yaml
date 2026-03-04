@@ -17,6 +17,14 @@ spec:
       activeService: {{ include "app-chart.fullname" . }}-active
       previewService: {{ include "app-chart.fullname" . }}-preview
       autoPromotionEnabled: {{ .Values.workload.blueGreen.autoPromotionEnabled | default false }}
+      {{- if .Values.workload.analysisTemplate.enabled }}
+      prePromotionAnalysis:
+        templates:
+        - templateName: {{ include "app-chart.fullname" . }}-preview-check
+        args:
+        - name: preview-url
+          value: "http://{{ include "app-chart.fullname" . }}-preview.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}{{ .Values.workload.analysisTemplate.path | default "/deco/_liveness" }}"
+      {{- end }}
   template:
     metadata:
       annotations:

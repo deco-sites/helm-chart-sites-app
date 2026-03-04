@@ -1,0 +1,23 @@
+{{- if and (eq .Values.workload.type "argorollout") .Values.workload.analysisTemplate.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ include "app-chart.fullname" . }}-preview-check
+  labels:
+    {{- include "app-chart.labels" . | nindent 4 }}
+spec:
+  args:
+  - name: preview-url
+    description: URL do service preview para validação (HTTP 200)
+  metrics:
+  # Web provider: requisição HTTP pelo controller; sucesso = HTTP 200 dentro do timeout.
+  # Evita o bug do Job provider onde Job falho ainda marcava AnalysisRun como Successful (issue #521).
+  # failureLimit: 0 = nenhuma falha tolerada; timeout 30s.
+  - name: preview-http-check
+    failureLimit: 0
+    successCondition: "true"
+    provider:
+      web:
+        url: "{{ "{{" }} args.preview-url {{ "}}" }}"
+        timeoutSeconds: {{ .Values.workload.analysisTemplate.timeoutSeconds | default 30 }}
+{{- end }}

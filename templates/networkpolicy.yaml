@@ -13,6 +13,11 @@ spec:
     - Ingress
     # - Egress
   ingress:
+    # Permite tráfego de outros pods na mesma namespace
+    {{- if .Values.networkPolicy.allowSameNamespace }}
+    - from:
+        - podSelector: {}
+    {{- end }}
     # Permite tráfego das namespaces listadas em allowedIngressNamespaces
     {{- if .Values.networkPolicy.allowedIngressNamespaces }}
     - from:

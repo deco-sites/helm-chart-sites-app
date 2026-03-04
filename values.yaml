@@ -12,6 +12,11 @@ workload:
     autoPromotionEnabled: false
   # Hosts para o Ingress de preview (Blue Green); ex: ["preview.meusite.com"]. Para TLS, inclua também em certificate.dnsNames.
   previewHosts: []
+  # AnalysisTemplate opcional: valida o endpoint preview (HTTP 200) antes de promover. Com enabled: true, use autoPromotionEnabled: true para promover automaticamente quando o teste passar.
+  analysisTemplate:
+    enabled: false
+    # Path do endpoint a ser verificado no service preview (ex.: /deco/_liveness ou /)
+    path: /deco/_liveness
 
 # -- Réplicas do Deployment / Rollout
 replicaCount: 1
@@ -231,6 +236,9 @@ networkPolicy:
   allowedIngressNamespaces:
     - traefik
     - monitoring
+    - argocd
+  # Se true, permite tráfego entre pods da mesma namespace (útil para Blue/Green com análise interna)
+  # allowSameNamespace: true
 
 # -- Node selector
 nodeSelector: 
