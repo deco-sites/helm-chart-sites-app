@@ -8,7 +8,7 @@ metadata:
 spec:
   args:
   - name: preview-url
-    description: URL do service preview para validação (HTTP 200)
+    # description: URL do service preview para validação (HTTP 200)
   metrics:
   # Web provider: requisição HTTP pelo controller; sucesso = HTTP 200 dentro do timeout.
   # Evita o bug do Job provider onde Job falho ainda marcava AnalysisRun como Successful (issue #521).

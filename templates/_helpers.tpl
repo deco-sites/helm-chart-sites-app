@@ -1,8 +1,13 @@
 {{/*
 Expand the name of the chart.
+Quando fullnameOverride está definido, usa esse valor; caso contrário usa nameOverride ou .Chart.Name.
 */}}
 {{- define "app-chart.name" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{/*
