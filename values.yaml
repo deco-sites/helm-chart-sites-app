@@ -1,266 +1,58 @@
-# -- Nome da aplicação: usado em labels e como base para nomes de recursos (ingress, certificate, service account, etc.)
-nameOverride: "storefront-site-example"
-# -- Nome completo: se definido, todos os recursos (Deployment, Service, Ingress, Certificate, ServiceAccount, ...) usam este nome
-fullnameOverride: "storefront-site-example"
+# Example override values for the eks-envs cluster (us-west-2 / nonprod)
+# Usage: helm install <release> . -f values.yaml -f values-eks-nonprod.yaml
+#        or via ArgoCD spec.source.helm.valueFiles
 
-# -- Tipo de workload: "deployment" (padrão) ou "argorollout" (Argo Rollouts Blue Green)
-workload:
-  #type: deployment
-  type: deployment
-  # Apenas para type: argorollout
-  blueGreen:
-    autoPromotionEnabled: false
-    # Segundos que os pods antigos permanecem após promoção (garante que o active service tenha endpoints antes dos velhos pods sumirem)
-    scaleDownDelaySeconds: 30
-  # Hosts para o Ingress de preview (Blue Green); ex: ["preview.meusite.com"]. Para TLS, inclua também em certificate.dnsNames.
-  previewHosts: []
-  # AnalysisTemplate opcional: valida o endpoint preview (HTTP 200) antes de promover. Com enabled: true, use autoPromotionEnabled: true para promover automaticamente quando o teste passar.
-  analysisTemplate:
-    enabled: false
-    # Path do endpoint a ser verificado no service preview (ex.: /deco/_liveness ou /)
-    path: /deco/_liveness
-
-# -- Réplicas do Deployment / Rollout
-replicaCount: 1
-
-# -- Imagem do container
-image:
-  repository: 123456789012.dkr.ecr.example-region.amazonaws.com/storefront-site-example
-  pullPolicy: IfNotPresent
-  tag: "1.0"
-
-# -- Image pull secrets
-imagePullSecrets: []
-
-# -- Service Account (name herdado do chart: fullnameOverride ou release + nameOverride)
-serviceAccount:
-  create: true
-  annotations: {}
-  # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/ROLE_NAME
-  name: ""  # se vazio, usa o nome do chart
-
-# -- Pod annotations
-podAnnotations: {}
-
-# -- Pod labels adicionais (necessário para topologySpreadConstraints labelSelector)
-extraPodLabels:
-  app.deco/site: storefront-site-example
-
-# -- Pod security context
-podSecurityContext:
-  # runAsNonRoot: true
-  # runAsUser: 1000
-  # fsGroup: 1000
-
-# -- Container security context
-securityContext:
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-# -- Envs opcionais: de Secret ou ConfigMap
-# envFrom: carrega todo o conteúdo do Secret/ConfigMap como env
-# env: carrega chaves específicas
-env:
-  # Habilitar uso de envs
-  enabled: false
-  # Refs completos (envFrom) - todo o conteúdo do secret/configmap
-  fromSecretRef: []
-  # - name: my-secret
-  fromConfigMapRef: []
-  # - name: my-configmap
-  # Chaves específicas (env com valueFrom)
-  secretKeyRefs: []
-  # - name: ENV_VAR_NAME
-  #   secretName: my-secret
-  #   key: secret-key
-  configMapKeyRefs: []
-  # - name: ENV_VAR_NAME
-  #   configMapName: my-configmap
-  #   key: config-key
-  # Envs literais (value)
-  literals: 
-    - name: OTEL_DENO
-      value: "true"
-    - name: OTEL_SERVICE_NAME
-      value: storefront-site-example
-    - name: OTEL_RESOURCE_ATTRIBUTES
-      value: site=storefront-site-example,deploymentId=hash_commit
-    - name: MAX_MEMORY_MB
-      value: "1280"
-    - name: DENO_V8_FLAGS
-      value: --max-heap-size=1024
-    - name: DECO_ACTORS_SERVER_URL
-      value: https://decocluster.com
-    - name: DECO_SITE_NAME
-      value: storefront-site-example
-    - name: DENO_DEPLOYMENT_ID
-      value: hash_commit
-    - name: CLOUD_PROVIDER
-      value: aws
-    - name: ENABLE_IMAGE_OPTIMIZATION
-      value: "false"
-    - name: OTEL_EXPORTER_OTLP_HEADERS
-      value: authorization=example-authorization-token
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: https://in-otel.hyperdx.io
-    - name: OTEL_SAMPLING_CONFIG
-      value: example-sampling-config
-    - name: NODE_ENV
-      value: production
-    - name: STALE_TTL_PERIOD
-      value: "300000"
-    - name: PROBE_MAX_MEMORY_RATIO_THRESHOLD
-      value: "0.8"
-    - name: PROBE_MAX_REQUEST_COUNT_THRESHOLD
-      value: "500000"
-    - name: PROBE_MAX_REQUEST_INFLIGHT_THRESHOLD
-      value: "50"
-    - name: PROBE_MAX_OPENED_RESOURCES_THRESHOLD
-      value: "200"
-    - name: PROBE_MAX_UPTIME_SECONDS_THRESHOLD
-      value: "21600"
-    - name: PROBE_MAX_MEDIAN_LATENCY_THRESHOLD
-      value: "1500"
-    - name: DECO_CRYPTO_KEY
-      value: example-crypto-key
-    - name: ENABLE_LOADER_CACHE
-      value: "true"
-    - name: FILE_SYSTEM_CACHE_DIRECTORY
-      value: /home/deno/.cache
-    - name: LOADER_CACHE_SIZE
-      value: "10000"
-    - name: LOADER_CACHE_START_TRESHOLD
-      value: "0"
-    - name: WEB_CACHE_ENGINE
-      value: FILE_SYSTEM
-    - name: MAX_CACHE_SIZE
-      value: "3221225472"
-    - name: PORT
-      value: "8000"
-
-# -- Resources do container (opcional)
-resources:
-  requests:
-    cpu: 200m
-    memory: 768Mi
-    ephemeral-storage: 3Gi
-  limits:
-    memory: 1280Mi
-    ephemeral-storage: 3Gi
-
-# -- Porta do container
-containerPort: 8000
-
-# -- Service
-service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8000
-  # nodePort: 30080  # para NodePort
-
-# -- HPA (Horizontal Pod Autoscaler)
-hpa:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 80
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
-
-# -- PDB (Pod Disruption Budget)
-pdb:
-  enabled: true
-  minAvailable: 3
-  # ou use maxUnavailable (não use os dois)
-  # maxUnavailable: 1
-
-# -- Service Monitor (Prometheus Operator)
-serviceMonitor:
-  enabled: false
-  interval: 30s
-  scrapeTimeout: 10s
-  path: /metrics
-  scheme: http
-  labels: {}
-  relabelings: []
-
-# -- External Secrets Operator (secretName, secretStore.name, secretStoreRef.name herdados do chart — nameOverride)
-externalSecrets:
-  enabled: false
-  secretStore:
-    provider: {}  # ex: aws: { service: SecretsManager, region: us-east-1, auth: { secretRef: ... } }
-  secretStoreRef:
-    kind: SecretStore  # ou ClusterSecretStore; name herdado do chart
-  externalSecret:
-    refreshInterval: 1h
-    data: []
-    # - secretKey: key-in-k8s-secret
-    #   remoteRef:
-    #     key: path/in/store
-    #     property: property-name
-  # Se true, adiciona envFrom com o secret criado pelo ExternalSecret no Deployment
-  useInDeployment: true
-
-# -- Certificate (cert-manager); name e secretName herdados do chart (nameOverride). dnsNames = Certificate + Ingress
-certificate:
-  issuerRef:
-    name: "decocms-ca-issuer"
-    kind: ClusterIssuer
-  dnsNames:
-    - storefront-site-example.dev.deco.cx
-    # - storefront-site-example-preview.dev.deco.cx
-  # - "*.example.com"
-
-# -- Ingress (Traefik; name e tls.secretName herdados do chart; hosts = certificate.dnsNames)
+# -- Ingress via ingress-nginx (NLB internet-facing)
 ingress:
-  extraAnnotations: {}
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
   tls: {}
 
-# -- NetworkPolicy (nega todo tráfego; exceções: egress kube-dns, ingress das namespaces listadas)
-networkPolicy:
-  enabled: true
-  # Lista de namespaces que podem enviar tráfego aos pods (ex.: traefik para Ingress, monitoring para Prometheus)
-  allowedIngressNamespaces:
-    - traefik
-    - monitoring
-    - argocd
-  # Se true, permite tráfego entre pods da mesma namespace (útil para Blue/Green com análise interna)
-  # allowSameNamespace: true
+# -- Certificate (cert-manager)
+# External DNS manages only *.nonprod.deco.site (Zone: Z1014755BCS1NFI9M0NE)
+certificate:
+  issuerRef:
+    name: decocms-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - <app-name>.nonprod.deco.site
+    # For blue/green preview:
+    # - <app-name>-preview.nonprod.deco.site
 
-# -- Node selector
-nodeSelector: 
-  appstype: sites-cms
+# -- Node pool: workloads-spot (arm64). For amd64 use workloads-spot-amd64.
+nodeSelector:
+  karpenter.sh/nodepool: workloads-spot
 
-# -- Tolerations
 tolerations:
   - effect: NoSchedule
-    key: appstype
+    key: karpenter.sh/nodepool
     operator: Equal
-    value: sites-cms
+    value: workloads-spot
 
-# -- Affinity
-affinity: {}
+# -- External Secrets via ClusterSecretStore (provisioned by Terraform, do not create own SecretStore)
+# IMPORTANT: remove from env.literals any keys fetched here to avoid precedence conflict.
+env:
+  enabled: true
 
-# -- Topology spread constraints
-topologySpreadConstraints:
-  - labelSelector:
-      matchLabels:
-        app.deco/site: storefront-site-example
-    maxSkew: 1
-    topologyKey: topology.kubernetes.io/zone
-    whenUnsatisfiable: ScheduleAnyway
+externalSecrets:
+  enabled: true
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  externalSecret:
+    refreshInterval: 1h
+    data:
+      - secretKey: OTEL_EXPORTER_OTLP_HEADERS
+        remoteRef:
+          key: nonprod/otel-config/general
+          property: OTEL_EXPORTER_OTLP_HEADERS
+      - secretKey: OTEL_SAMPLING_CONFIG
+        remoteRef:
+          key: nonprod/otel-config/general
+          property: OTEL_SAMPLING_CONFIG
+      - secretKey: DECO_CRYPTO_KEY
+        remoteRef:
+          key: nonprod/<app-name>/general
+          property: DECO_CRYPTO_KEY
+  useInDeployment: true
