@@ -1,6 +1,6 @@
 {{/*
 Expand the name of the chart.
-Quando fullnameOverride está definido, usa esse valor; caso contrário usa nameOverride ou .Chart.Name.
+When fullnameOverride is set, uses that value; otherwise uses nameOverride or .Chart.Name.
 */}}
 {{- define "app-chart.name" -}}
 {{- if .Values.fullnameOverride }}
@@ -54,7 +54,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Nome do Service principal (Deployment = fullname; Argo Rollout = fullname-active)
+Name of the main Service (Deployment = fullname; Argo Rollout = fullname-active)
 */}}
 {{- define "app-chart.mainServiceName" -}}
 {{- if eq .Values.workload.type "argorollout" -}}
