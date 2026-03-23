@@ -35,6 +35,13 @@ tolerations:
 env:
   enabled: true
 
+# -- Extra pod volumes and container mounts (optional)
+extraVolumes: []
+extraVolumeMounts: []
+
+# -- Container lifecycle hooks (optional)
+lifecycle: {}
+
 externalSecrets:
   enabled: true
   secretStoreRef:
