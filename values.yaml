@@ -42,6 +42,10 @@ extraVolumeMounts: []
 # -- Container lifecycle hooks (optional)
 lifecycle: {}
 
+# -- Container termination message settings (optional)
+terminationMessagePath: ""
+terminationMessagePolicy: ""
+
 externalSecrets:
   enabled: true
   secretStoreRef:

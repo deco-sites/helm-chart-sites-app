@@ -50,6 +50,12 @@ spec:
           lifecycle:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .Values.terminationMessagePath }}
+          terminationMessagePath: {{ . | quote }}
+          {{- end }}
+          {{- with .Values.terminationMessagePolicy }}
+          terminationMessagePolicy: {{ . | quote }}
+          {{- end }}
           {{- if or .Values.env.enabled (and .Values.externalSecrets.enabled .Values.externalSecrets.useInDeployment) }}
           envFrom:
             {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.useInDeployment }}
