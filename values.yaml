@@ -39,6 +39,23 @@ env:
 extraVolumes: []
 extraVolumeMounts: []
 
+# -- Liveness and readiness probe configuration
+livenessProbe:
+  path: /deco/_liveness
+  initialDelaySeconds: 10
+  periodSeconds: 4
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+readinessProbe:
+  path: /deco/_liveness
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
 # -- Container lifecycle hooks (optional)
 lifecycle: {}
 

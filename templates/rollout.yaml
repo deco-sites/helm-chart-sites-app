@@ -24,7 +24,7 @@ spec:
         - templateName: {{ include "app-chart.fullname" . }}-preview-check
         args:
         - name: preview-url
-          value: "http://{{ include "app-chart.fullname" . }}-preview.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}{{ .Values.workload.analysisTemplate.path | default "/deco/_liveness" }}"
+          value: "http://{{ include "app-chart.fullname" . }}-preview.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}{{ .Values.workload.analysisTemplate.path | default .Values.livenessProbe.path }}"
       {{- end }}
   template:
     metadata:
@@ -122,19 +122,24 @@ spec:
           {{- end }}
           livenessProbe:
             httpGet:
-              path: /deco/_liveness
+              path: {{ .Values.livenessProbe.path }}
               port: {{ .Values.containerPort }}
               scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 4
-            timeoutSeconds: 3
-            successThreshold: 1
-            failureThreshold: 3
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /deco/_liveness
+              path: {{ .Values.readinessProbe.path }}
               port: {{ .Values.containerPort }}
               scheme: HTTP
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
