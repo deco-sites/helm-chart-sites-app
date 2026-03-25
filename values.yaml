@@ -20,15 +20,11 @@ certificate:
     # For blue/green preview:
     # - <app-name>-preview.nonprod.deco.site
 
-# -- Node pool: workloads-spot (arm64). For amd64 use workloads-spot-amd64.
-nodeSelector:
-  karpenter.sh/nodepool: workloads-spot
+# -- Node selector: define in values-custom.yaml per app (e.g. node.deco/capacity-type, node.deco/arch)
+nodeSelector: {}
 
-tolerations:
-  - effect: NoSchedule
-    key: karpenter.sh/nodepool
-    operator: Equal
-    value: workloads-spot
+# -- Tolerations: define in values-custom.yaml per app
+tolerations: []
 
 # -- External Secrets via ClusterSecretStore (provisioned by Terraform, do not create own SecretStore)
 # IMPORTANT: remove from env.literals any keys fetched here to avoid precedence conflict.
