@@ -35,6 +35,9 @@ env:
 extraVolumes: []
 extraVolumeMounts: []
 
+# -- Extra arbitrary Kubernetes manifests rendered alongside chart resources
+extraManifests: []
+
 # -- Liveness and readiness probe configuration
 livenessProbe:
   path: /deco/_liveness
